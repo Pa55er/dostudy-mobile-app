@@ -68,7 +68,7 @@ class AModeActivity : AppCompatActivity() {
                     NotificationChannelManager.StudyNotificationChannel.uniqueId).apply {
                     setSmallIcon(R.drawable.ic_launcher_background)
                     setContentTitle(result)
-                    priority = NotificationCompat.PRIORITY_LOW
+                    priority = NotificationCompat.PRIORITY_DEFAULT
                 }
                 val progressMax = numPickerSecond.value - 1
                 var progressCur = progressMax
