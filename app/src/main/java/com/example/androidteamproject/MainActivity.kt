@@ -1,5 +1,6 @@
 package com.example.androidteamproject
 
+import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -49,9 +50,13 @@ class MainActivity : AppCompatActivity() {
 
         btnAMode.setOnClickListener {
             //A 모드 버튼 클릭 시 동작
+            var intent = Intent(applicationContext,AModeActivity::class.java)
+            startActivity(intent)
         }
         btnBMode.setOnClickListener {
             //B 모드 버튼 클릭 시 동작
+            var intent = Intent(applicationContext,BModeActivity::class.java)
+            startActivity(intent)
         }
         btnSetting.setOnClickListener {
             //설정 버튼 클릭 시 동작
