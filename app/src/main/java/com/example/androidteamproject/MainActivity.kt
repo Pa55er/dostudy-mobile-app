@@ -1,16 +1,25 @@
 package com.example.androidteamproject
 
+import android.annotation.SuppressLint
+import android.app.AppOpsManager
 import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.Button
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import java.util.*
+import kotlin.collections.HashSet
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,14 +28,15 @@ class MainActivity : AppCompatActivity() {
     lateinit var btnSetting : Button
     lateinit var btnD : Button
     lateinit var btnW : Button
-    lateinit var aModeDB: AModeDatabase
     lateinit var bModeDB: BModeDatabase
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        checkUsageStatsPermission()
+        checkOverlayPermission()
 
         val notificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -34,7 +44,6 @@ class MainActivity : AppCompatActivity() {
             NotificationChannelManager.StudyNotificationChannel.notificationChannel
         )
 
-        aModeDB = AModeDatabase.getInstance(applicationContext)!!
         bModeDB = BModeDatabase.getInstance(applicationContext)!!
         databaseSynchronization()
 
@@ -43,6 +52,22 @@ class MainActivity : AppCompatActivity() {
         btnSetting = findViewById<Button>(R.id.btnSetting)
         btnD = findViewById<Button>(R.id.btnD)
         btnW = findViewById<Button>(R.id.btnW)
+
+        AModeActivity.mainActivity = this
+//        NotificationManagerCompat.from(this).apply {
+//            val timer = Timer()
+//            timer.schedule(object : TimerTask() {
+//                override fun run() {
+//                    for(i in 0..strApp.size-1) {
+//                        if (pkgListDB[i].isChecked) {
+//                            if(현재시간 >= pkgListDB[i].limitHour && 현재분 >= pkgListDB[i].limitMinute) {
+//                                그 앱명으로 앱 차단
+//                            }
+//                        }
+//                    }
+//                }
+//            }, 0, 1000)
+//        }
 
         btnAMode.setOnClickListener{
             val nextIntent = Intent(this@MainActivity, AModeActivity::class.java)
@@ -75,10 +100,14 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    @SuppressLint("QueryPermissionsNeeded")
     private fun databaseSynchronization() {
         // 설치된 패키지들을 가져오기 위한 intent
         var intent = Intent(Intent.ACTION_MAIN, null)
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
+
+        val excludePkgList = listOf("com.android.dialer", "com.android.settings",
+            "com.google.android.apps.messaging", "com.example.androidteamproject")
 
         // 현재 설치된 패키지들
         var pkgList: MutableMap<String, String> =
@@ -89,10 +118,15 @@ class MainActivity : AppCompatActivity() {
                         .toString()
                 }.toMutableMap()
 
+        AModeActivity.aModeBlockPkgList =
+            pkgList.map { it.key }.toMutableSet()
+
+        excludePkgList.forEach { AModeActivity.aModeBlockPkgList!!.remove(it) }
+
         // DB에 저장된 패키지들
         var pkgListDB = runBlocking {
             withContext(CoroutineScope(Dispatchers.Default).coroutineContext) {
-                aModeDB.aModePackageDataDao().getAll()
+                bModeDB.bModePackageDataDao().getAll()
             }
         }.map { it.packageName }
 
@@ -103,7 +137,6 @@ class MainActivity : AppCompatActivity() {
             else {
                 runBlocking {
                     withContext(CoroutineScope(Dispatchers.Default).coroutineContext) {
-                        aModeDB.aModePackageDataDao().deleteDataByPackageName(it)
                         bModeDB.bModePackageDataDao().deleteDataByPackageName(it)
                     }
                 }
@@ -114,13 +147,43 @@ class MainActivity : AppCompatActivity() {
         pkgList.forEach {
             runBlocking {
                 withContext(CoroutineScope(Dispatchers.Default).coroutineContext) {
-                    aModeDB.aModePackageDataDao().insert(
-                        AModePackageData(it.key, it.value, false)
-                    )
                     bModeDB.bModePackageDataDao().insert(
-                        BModePackageData(it.key, it.value, false, 0)
+                        BModePackageData(it.key, it.value, false, 0, 0, 0)
                     )
                 }
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun checkUsageStatsPermission() {
+        var granted = false
+        val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        val mode = appOps.checkOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            android.os.Process.myUid(), packageName)
+
+        if (mode == AppOpsManager.MODE_DEFAULT) {
+            granted =
+                checkCallingOrSelfPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) ==
+                        PackageManager.PERMISSION_GRANTED
+        }
+        else {
+            granted = mode == AppOpsManager.MODE_ALLOWED
+        }
+
+        if (!granted) {
+            val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+            startActivity(intent)
+        }
+    }
+
+    fun checkOverlayPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                // send user to the device settings
+                val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                startActivity(myIntent)
             }
         }
     }

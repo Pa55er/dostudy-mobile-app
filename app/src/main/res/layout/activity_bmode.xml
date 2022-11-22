@@ -42,17 +42,9 @@
         android:layout_gravity="bottom">
 
         <Button
-            android:id="@+id/btnBModeCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="취소" />
-
-        <Button
             android:id="@+id/btnBModeSave"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="저장" />
     </LinearLayout>
 </LinearLayout>

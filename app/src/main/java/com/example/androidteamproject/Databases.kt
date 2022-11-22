@@ -3,63 +3,65 @@ package com.example.androidteamproject
 import android.content.Context
 import androidx.room.*
 
-@Entity
-data class AModePackageData (
-    @PrimaryKey var packageName: String,
-    var appName: String,
-    var isChecked: Boolean
-) {}
-
-@Dao
-interface AModePackageDataDao {
-    @Insert
-    fun insert(data: AModePackageData)
-
-    @Update
-    fun update(data: AModePackageData)
-
-    @Delete
-    fun delete(data: AModePackageData)
-
-    @Query("SELECT * FROM AModePackageData")
-    fun getAll(): List<AModePackageData>
-
-    @Query("DELETE FROM AModePackageData WHERE packageName = :pkgName")
-    fun deleteDataByPackageName(pkgName: String)
-
-    @Query("SELECT EXISTS(SELECT * FROM AModePackageData WHERE packageName = :pkgName)")
-    fun isPackageExists(pkgName: String): Boolean
-}
-
-@Database(entities = [AModePackageData::class], version = 1)
-abstract class AModeDatabase : RoomDatabase() {
-    abstract fun aModePackageDataDao() : AModePackageDataDao
-
-    companion object {
-        private var instance: AModeDatabase? = null
-
-        @Synchronized
-        fun getInstance(context: Context): AModeDatabase? {
-            if (instance == null) {
-                synchronized(AModeDatabase::class) {
-                    instance = Room.databaseBuilder(
-                        context.applicationContext,
-                        AModeDatabase::class.java,
-                        "AMode-Database"
-                    ).build()
-                }
-            }
-            return instance
-        }
-    }
-}
+//@Entity
+//data class AModePackageData (
+//    @PrimaryKey var packageName: String,
+//    var appName: String,
+//    var isChecked: Boolean
+//) {}
+//
+//@Dao
+//interface AModePackageDataDao {
+//    @Insert
+//    fun insert(data: AModePackageData)
+//
+//    @Update
+//    fun update(data: AModePackageData)
+//
+//    @Delete
+//    fun delete(data: AModePackageData)
+//
+//    @Query("SELECT * FROM AModePackageData")
+//    fun getAll(): List<AModePackageData>
+//
+//    @Query("DELETE FROM AModePackageData WHERE packageName = :pkgName")
+//    fun deleteDataByPackageName(pkgName: String)
+//
+//    @Query("SELECT EXISTS(SELECT * FROM AModePackageData WHERE packageName = :pkgName)")
+//    fun isPackageExists(pkgName: String): Boolean
+//}
+//
+//@Database(entities = [AModePackageData::class], version = 1)
+//abstract class AModeDatabase : RoomDatabase() {
+//    abstract fun aModePackageDataDao() : AModePackageDataDao
+//
+//    companion object {
+//        private var instance: AModeDatabase? = null
+//
+//        @Synchronized
+//        fun getInstance(context: Context): AModeDatabase? {
+//            if (instance == null) {
+//                synchronized(AModeDatabase::class) {
+//                    instance = Room.databaseBuilder(
+//                        context.applicationContext,
+//                        AModeDatabase::class.java,
+//                        "AMode-Database"
+//                    ).build()
+//                }
+//            }
+//            return instance
+//        }
+//    }
+//}
 
 @Entity
 data class BModePackageData (
     @PrimaryKey var packageName: String,
     var appName: String,
     var isChecked: Boolean,
-    var limitTime: Int
+    var limitTimeHour: Int,
+    var limitTimeMinute: Int,
+    var limitTimeSecond: Int
 ) {}
 
 @Dao
@@ -105,5 +107,6 @@ abstract class BModeDatabase : RoomDatabase() {
         }
     }
 }
+
 
 
