@@ -1,65 +1,190 @@
 package com.example.androidteamproject
 
+import android.annotation.SuppressLint
+import android.app.AppOpsManager
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.Button
-import android.widget.Switch
-import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import java.util.*
+import kotlin.collections.HashSet
 
 class MainActivity : AppCompatActivity() {
-    lateinit var swAppEnabled : Switch
-    lateinit var tvDisabled : TextView
-    lateinit var tvEnabled : TextView
+
     lateinit var btnAMode : Button
     lateinit var btnBMode : Button
     lateinit var btnSetting : Button
-    fun swAppCheck(b:Boolean){
-        //앱 활성화, 비활성화 체크 스위치 동작 -> 활성화, 비활성화 텍스트 설정
-        if(b){
-            tvDisabled.setTextColor(Color.WHITE)
-            tvEnabled.setTextColor(Color.BLACK)
-        }
-        else{
-            tvDisabled.setTextColor(Color.BLACK)
-            tvEnabled.setTextColor(Color.WHITE)
-        }
-    }
+    lateinit var btnD : Button
+    lateinit var btnW : Button
+    lateinit var bModeDB: BModeDatabase
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        swAppEnabled = findViewById(R.id.swAppEnabled)
-        tvDisabled = findViewById(R.id.tvDisabled)
-        tvEnabled = findViewById(R.id.tvEnabled)
-        btnAMode = findViewById(R.id.btnAMode)
-        btnBMode = findViewById(R.id.btnBMode)
-        btnSetting = findViewById(R.id.btnSetting)
 
-        swAppCheck(swAppEnabled.isChecked)
+        checkUsageStatsPermission()
+        checkOverlayPermission()
 
-        swAppEnabled.setOnCheckedChangeListener { compoundButton, b ->
-            swAppCheck(b)//활성화, 비활성화 텍스트 설정
-            if(b){
-                //앱 활성화 시 동작
-            }
-            else{
-                //앱 비활성화 시 동작
-            }
+        val notificationManager =
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(
+            NotificationChannelManager.StudyNotificationChannel.notificationChannel
+        )
+
+        bModeDB = BModeDatabase.getInstance(applicationContext)!!
+        databaseSynchronization()
+
+        btnAMode = findViewById<Button>(R.id.btnAMode)
+        btnBMode = findViewById<Button>(R.id.btnBMode)
+        btnSetting = findViewById<Button>(R.id.btnSetting)
+        btnD = findViewById<Button>(R.id.btnD)
+        btnW = findViewById<Button>(R.id.btnW)
+
+        AModeActivity.mainActivity = this
+//        NotificationManagerCompat.from(this).apply {
+//            val timer = Timer()
+//            timer.schedule(object : TimerTask() {
+//                override fun run() {
+//                    for(i in 0..strApp.size-1) {
+//                        if (pkgListDB[i].isChecked) {
+//                            if(현재시간 >= pkgListDB[i].limitHour && 현재분 >= pkgListDB[i].limitMinute) {
+//                                그 앱명으로 앱 차단
+//                            }
+//                        }
+//                    }
+//                }
+//            }, 0, 1000)
+//        }
+
+        btnAMode.setOnClickListener{
+            val nextIntent = Intent(this@MainActivity, AModeActivity::class.java)
+            // A모드 시작
+            startActivity(nextIntent)
         }
 
-        btnAMode.setOnClickListener {
-            //A 모드 버튼 클릭 시 동작
-            var intent = Intent(applicationContext,AModeActivity::class.java)
-            startActivity(intent)
-        }
         btnBMode.setOnClickListener {
-            //B 모드 버튼 클릭 시 동작
-            var intent = Intent(applicationContext,BModeActivity::class.java)
+            val nextIntent = Intent(this@MainActivity, BModeActivity::class.java)
+            // B모드 시작
+            startActivity(nextIntent)
+        }
+
+        btnD.setOnClickListener{
+            ThemeManager.applyTheme(ThemeManager.ThemeMode.DARK)
+            finish()//인텐트 종료
+            overridePendingTransition(0, 0)//인텐트 효과 없애기
+            val intent = intent //인텐트
+            startActivity(intent) //액티비티 열기
+            overridePendingTransition(0, 0)//인텐트 효과 없애기
+        }
+        btnW.setOnClickListener{
+            ThemeManager.applyTheme(ThemeManager.ThemeMode.LIGHT)
+            finish()//인텐트 종료
+            overridePendingTransition(0, 0)//인텐트 효과 없애기
+            val intent = intent //인텐트
+            startActivity(intent) //액티비티 열기
+            overridePendingTransition(0, 0)//인텐트 효과 없애기
+        }
+
+    }
+
+    @SuppressLint("QueryPermissionsNeeded")
+    private fun databaseSynchronization() {
+        // 설치된 패키지들을 가져오기 위한 intent
+        var intent = Intent(Intent.ACTION_MAIN, null)
+        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+
+        val excludePkgList = listOf("com.android.dialer", "com.android.settings",
+            "com.google.android.apps.messaging", "com.example.androidteamproject")
+
+        // 현재 설치된 패키지들
+        var pkgList: MutableMap<String, String> =
+            applicationContext
+                .packageManager
+                .queryIntentActivities(intent, 0).associate {
+                    it.activityInfo.packageName to it.activityInfo.loadLabel(packageManager)
+                        .toString()
+                }.toMutableMap()
+
+        AModeActivity.aModeBlockPkgList =
+            pkgList.map { it.key }.toMutableSet()
+
+        excludePkgList.forEach { AModeActivity.aModeBlockPkgList!!.remove(it) }
+
+        // DB에 저장된 패키지들
+        var pkgListDB = runBlocking {
+            withContext(CoroutineScope(Dispatchers.Default).coroutineContext) {
+                bModeDB.bModePackageDataDao().getAll()
+            }
+        }.map { it.packageName }
+
+        // DB에 저장된 패키지들을 pkgList에서 제거하여 추가된 패키지 들만 남긴다
+        // 만약 pkgList에 없다면 삭제된 패키지이므로 DB에서 제거한다
+        pkgListDB.forEach {
+            if (pkgList.contains(it)) pkgList.remove(it)
+            else {
+                runBlocking {
+                    withContext(CoroutineScope(Dispatchers.Default).coroutineContext) {
+                        bModeDB.bModePackageDataDao().deleteDataByPackageName(it)
+                    }
+                }
+            }
+        }
+
+        // 새로 추가된 패키지들을 DB에 추가한다
+        pkgList.forEach {
+            runBlocking {
+                withContext(CoroutineScope(Dispatchers.Default).coroutineContext) {
+                    bModeDB.bModePackageDataDao().insert(
+                        BModePackageData(it.key, it.value, false, 0, 0, 0)
+                    )
+                }
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun checkUsageStatsPermission() {
+        var granted = false
+        val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        val mode = appOps.checkOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            android.os.Process.myUid(), packageName)
+
+        if (mode == AppOpsManager.MODE_DEFAULT) {
+            granted =
+                checkCallingOrSelfPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) ==
+                        PackageManager.PERMISSION_GRANTED
+        }
+        else {
+            granted = mode == AppOpsManager.MODE_ALLOWED
+        }
+
+        if (!granted) {
+            val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
             startActivity(intent)
         }
-        btnSetting.setOnClickListener {
-            //설정 버튼 클릭 시 동작
+    }
+
+    fun checkOverlayPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                // send user to the device settings
+                val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                startActivity(myIntent)
+            }
         }
     }
 }

@@ -49,4 +49,27 @@
         android:layout_height="wrap_content"
         android:text="설정" />
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/btnD"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="다크"/>
+
+        <Button
+            android:id="@+id/btnW"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="화이트"/>
+
+
+    </LinearLayout>
+
 </LinearLayout>
