@@ -75,7 +75,7 @@ interface BModePackageDataDao {
     @Delete
     fun delete(data: BModePackageData)
 
-    @Query("SELECT * FROM BModePackageData")
+    @Query("SELECT * FROM BModePackageData ORDER BY appName")
     fun getAll(): List<BModePackageData>
 
     @Query("DELETE FROM BModePackageData WHERE packageName = :pkgName")

@@ -11,11 +11,8 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.collection.LongSparseArray
 
-
-class CheckRunningActivity(context: Context, blockList: MutableSet<String>?) : Thread() {
+class BModeCheckRunningActivity(var context: Context, val blockList: Map<String, Int>) : Thread() {
     var am: ActivityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-    var context: Context = context
-    val blockList = blockList
 
     companion object {
         var condition: Boolean = true
@@ -31,8 +28,11 @@ class CheckRunningActivity(context: Context, blockList: MutableSet<String>?) : T
         while (condition) {
             val packageName = getPackageName(context)
             //if (packageName != "com.android.chrome") Log.d("ChkRunningActivity", packageName)
-            if (blockList!!.contains(packageName)) {
-                Log.d("ChkRunningActivity", "chrome launched")
+
+            val tmp = blockList.keys.toList()
+            Log.d("block list", tmp.toString())
+
+            if (blockList.contains(packageName)) {
                 if (!OverlayService.isRunning) {
                     context.startForegroundService(intent)
                     OverlayService.isRunning = true
@@ -59,7 +59,7 @@ class CheckRunningActivity(context: Context, blockList: MutableSet<String>?) : T
             context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
         var lastRunAppTimeStamp = 0L
-        val interval = 3600000L // 1시간
+        val interval = 86400000L // 24시간
         val end = System.currentTimeMillis()
         val begin = end - interval
 

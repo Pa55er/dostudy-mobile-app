@@ -5,7 +5,6 @@ import android.app.AppOpsManager
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -13,19 +12,16 @@ import android.provider.Settings
 import android.widget.Button
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.*
-import kotlin.collections.HashSet
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var btnAMode : Button
     lateinit var btnBMode : Button
-    lateinit var btnSetting : Button
     lateinit var btnD : Button
     lateinit var btnW : Button
     lateinit var bModeDB: BModeDatabase
@@ -38,10 +34,16 @@ class MainActivity : AppCompatActivity() {
         checkUsageStatsPermission()
         checkOverlayPermission()
 
-        val notificationManager =
+        val aModeNotificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(
-            NotificationChannelManager.StudyNotificationChannel.notificationChannel
+
+        aModeNotificationManager.createNotificationChannel(
+            AModeNotificationChannelManager.StudyNotificationChannel.notificationChannel
+        )
+
+        val bModeNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        bModeNotificationManager.createNotificationChannel(
+            BModeNotificationChannelManager.StudyNotificationChannel.notificationChannel
         )
 
         bModeDB = BModeDatabase.getInstance(applicationContext)!!
@@ -49,25 +51,11 @@ class MainActivity : AppCompatActivity() {
 
         btnAMode = findViewById<Button>(R.id.btnAMode)
         btnBMode = findViewById<Button>(R.id.btnBMode)
-        btnSetting = findViewById<Button>(R.id.btnSetting)
         btnD = findViewById<Button>(R.id.btnD)
         btnW = findViewById<Button>(R.id.btnW)
 
         AModeActivity.mainActivity = this
-//        NotificationManagerCompat.from(this).apply {
-//            val timer = Timer()
-//            timer.schedule(object : TimerTask() {
-//                override fun run() {
-//                    for(i in 0..strApp.size-1) {
-//                        if (pkgListDB[i].isChecked) {
-//                            if(현재시간 >= pkgListDB[i].limitHour && 현재분 >= pkgListDB[i].limitMinute) {
-//                                그 앱명으로 앱 차단
-//                            }
-//                        }
-//                    }
-//                }
-//            }, 0, 1000)
-//        }
+        BModeActivity.mainActivity = this
 
         btnAMode.setOnClickListener{
             val nextIntent = Intent(this@MainActivity, AModeActivity::class.java)
@@ -97,7 +85,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent) //액티비티 열기
             overridePendingTransition(0, 0)//인텐트 효과 없애기
         }
-
     }
 
     @SuppressLint("QueryPermissionsNeeded")

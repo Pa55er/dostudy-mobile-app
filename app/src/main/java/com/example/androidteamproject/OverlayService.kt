@@ -10,8 +10,10 @@ import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
 import android.view.*
+import android.widget.ImageView
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import kotlin.random.Random
 
 
 class OverlayService : Service() {
@@ -55,8 +57,19 @@ class OverlayService : Service() {
             PixelFormat.TRANSLUCENT
         )
 
-        params.gravity = Gravity.LEFT or Gravity.TOP
+        params.gravity = Gravity.START
         mView = inflate.inflate(R.layout.view_in_service, null)
+
+        // 이미지 리스트 생성
+
+
+        // 랜덤 코드 작성
+
+
+        // 이미지 설정
+        var imageView: ImageView = (mView as View).findViewById<ImageView>(R.id.imageView)
+        //imageView.setImageResource()
+
         wm.addView(mView, params)
         isRunning = true
     }

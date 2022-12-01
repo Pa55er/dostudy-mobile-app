@@ -12,10 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.LongSparseArray
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.util.*
 
 
@@ -61,7 +57,7 @@ class AModeActivity : AppCompatActivity() {
                 btnBMode.isClickable = false
 
                 val builder = NotificationCompat.Builder(this,
-                    NotificationChannelManager.StudyNotificationChannel.uniqueId).apply {
+                    AModeNotificationChannelManager.StudyNotificationChannel.uniqueId).apply {
                     setSmallIcon(R.drawable.ic_launcher_background)
                     setContentTitle(result)
                     priority = NotificationCompat.PRIORITY_DEFAULT
@@ -72,8 +68,8 @@ class AModeActivity : AppCompatActivity() {
                 var progressCur = progressMax
                 NotificationManagerCompat.from(this).apply {
                     val timer = Timer()
-                    CheckRunningActivity.condition = true
-                    CheckRunningActivity(this@AModeActivity, aModeBlockPkgList)
+                    AModeCheckRunningActivity.condition = true
+                    AModeCheckRunningActivity(this@AModeActivity, aModeBlockPkgList)
                         .start()
 
                     timer.schedule(object : TimerTask() {
@@ -87,7 +83,7 @@ class AModeActivity : AppCompatActivity() {
                                 btn1.isClickable = true
                                 // A모드 종료시 B모드 다시 활성화
                                 btnBMode.isClickable = true
-                                CheckRunningActivity.condition = false
+                                AModeCheckRunningActivity.condition = false
                             }
                             builder.setProgress(progressMax, progressCur, false)
                             notify(66, builder.build())
