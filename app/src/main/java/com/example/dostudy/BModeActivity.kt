@@ -23,7 +23,7 @@ class BModeActivity : AppCompatActivity() {
     lateinit var LLBModeAppList : LinearLayout // 앱 리스트 동적 추가 할 장소
     lateinit var btnBModeSave : Button // 저장 버튼
     lateinit var bModeDB: BModeDatabase
-    lateinit var llAppNameCheckbox : LinearLayout
+    lateinit var LOAppName : LinearLayout
 
     companion object {
         var mainActivity: MainActivity? = null
@@ -60,14 +60,14 @@ class BModeActivity : AppCompatActivity() {
         btnBModeSave = findViewById(R.id.btnBModeSave)
 
         for (i in pkgList.indices) {
-            llAppNameCheckbox = LinearLayout(this)
-            val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT)
-            llAppNameCheckbox.layoutParams = params
+            LOAppName = LinearLayout(this)
+            val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT)
+            LOAppName.layoutParams = params
 
             chkboxApps[i] = CheckBox(this)
             chkboxApps[i]!!.isChecked = pkgList[i].isChecked
             chkboxApps[i]!!.id = View.generateViewId()
+            chkboxApps[i]!!.width = 100
 
             tvAppNames[i] = TextView(this)
             tvAppNames[i]!!.id = View.generateViewId()
@@ -97,6 +97,7 @@ class BModeActivity : AppCompatActivity() {
 
             tvHs[i] = TextView(this)
             tvHs[i]!!.text = "시"
+            tvHs[i]!!.gravity = Gravity.CENTER
 
             npHs[i] = NumberPicker(this)
             npHs[i]!!.maxValue = 23
@@ -114,6 +115,7 @@ class BModeActivity : AppCompatActivity() {
 
             tvMs[i] = TextView(this)
             tvMs[i]!!.text = "분"
+            tvMs[i]!!.gravity = Gravity.CENTER
 
             npMs[i] = NumberPicker(this)
             npMs[i]!!.maxValue = 59
@@ -131,6 +133,7 @@ class BModeActivity : AppCompatActivity() {
 
             tvSs[i] = TextView(this)
             tvSs[i]!!.text = "초"
+            tvSs[i]!!.gravity = Gravity.CENTER
 
             npSs[i] = NumberPicker(this)
             npSs[i]!!.maxValue = 59
@@ -140,8 +143,13 @@ class BModeActivity : AppCompatActivity() {
 
 
             //앱 이름과 체크박스 추가
-            llAppNameCheckbox.addView(tvAppNames[i])
-            llAppNameCheckbox.addView(chkboxApps[i])
+            var widthPixels = resources.displayMetrics.widthPixels
+            var tempTV = TextView(this)
+            tempTV.width = (widthPixels - (tvAppNames[i]!!.paint.measureText(tvAppNames[i]!!.text.toString()) + 100)).toInt()
+            tempTV.height = tvAppNames[i]!!.height
+            LOAppName.addView(tvAppNames[i])
+            LOAppName.addView(tempTV)
+            LOAppName.addView(chkboxApps[i])
 
             //넘버 피커 추가
             llSettingNPHs[i]!!.addView(tvHs[i])
@@ -157,7 +165,7 @@ class BModeActivity : AppCompatActivity() {
             llSettingNPs[i]!!.addView(llSettingNPMs[i])
             llSettingNPs[i]!!.addView(llSettingNPSs[i])
             // 리스트 뷰에 전부 추가
-            LLBModeAppList.addView(llAppNameCheckbox)
+            LLBModeAppList.addView(LOAppName)
             LLBModeAppList.addView(btnTimeSettings[i])
             LLBModeAppList.addView(llSettingNPs[i])
         }
