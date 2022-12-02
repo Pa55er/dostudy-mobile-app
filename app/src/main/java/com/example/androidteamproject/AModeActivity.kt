@@ -32,6 +32,7 @@ class AModeActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
         setContentView(R.layout.activity_amode)
 
         numPickerHour = findViewById<NumberPicker>(R.id.numPickerHour)
