@@ -1,4 +1,4 @@
-package com.example.androidteamproject
+package com.example.DoStudy
 
 import android.app.ActivityManager
 import android.app.usage.UsageEvents

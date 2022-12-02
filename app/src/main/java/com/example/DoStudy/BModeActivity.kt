@@ -1,4 +1,4 @@
-package com.example.androidteamproject
+package com.example.DoStudy
 
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity

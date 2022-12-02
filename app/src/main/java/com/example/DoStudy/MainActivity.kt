@@ -1,4 +1,4 @@
-package com.example.androidteamproject
+package com.example.DoStudy
 
 import android.annotation.SuppressLint
 import android.app.AppOpsManager
@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
 
         val excludePkgList = listOf("com.android.dialer", "com.android.settings",
-            "com.google.android.apps.messaging", "com.example.androidteamproject")
+            "com.google.android.apps.messaging", "com.example.DoStudy")
 
         // 현재 설치된 패키지들
         var pkgList: MutableMap<String, String> =

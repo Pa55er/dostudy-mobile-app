@@ -1,4 +1,4 @@
-package com.example.androidteamproject
+package com.example.DoStudy
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

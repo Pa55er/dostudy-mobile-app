@@ -1,4 +1,4 @@
-package com.example.androidteamproject
+package com.example.DoStudy
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -13,7 +13,6 @@ import android.view.*
 import android.widget.ImageView
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import kotlin.random.Random
 
 
 class OverlayService : Service() {
