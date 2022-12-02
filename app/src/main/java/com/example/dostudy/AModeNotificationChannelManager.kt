@@ -1,4 +1,4 @@
-package com.example.DoStudy
+package com.example.dostudy
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

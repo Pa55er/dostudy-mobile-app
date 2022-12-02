@@ -1,4 +1,4 @@
-package com.example.DoStudy
+package com.example.dostudy
 
 import androidx.appcompat.app.AppCompatDelegate
 

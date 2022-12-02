@@ -1,4 +1,4 @@
-package com.example.DoStudy
+package com.example.dostudy
 
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
