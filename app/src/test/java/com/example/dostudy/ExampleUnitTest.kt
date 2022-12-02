@@ -1,4 +1,4 @@
-package com.example.androidteamproject
+package com.example.dostudy
 
 import org.junit.Test
 

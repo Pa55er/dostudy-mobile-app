@@ -1,4 +1,4 @@
-package com.example.androidteamproject
+package com.example.dostudy
 
 import android.content.Context
 import androidx.room.*
@@ -75,7 +75,7 @@ interface BModePackageDataDao {
     @Delete
     fun delete(data: BModePackageData)
 
-    @Query("SELECT * FROM BModePackageData")
+    @Query("SELECT * FROM BModePackageData ORDER BY appName")
     fun getAll(): List<BModePackageData>
 
     @Query("DELETE FROM BModePackageData WHERE packageName = :pkgName")

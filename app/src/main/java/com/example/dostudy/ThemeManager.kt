@@ -1,6 +1,5 @@
-package com.example.androidteamproject
+package com.example.dostudy
 
-import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 
 object ThemeManager {

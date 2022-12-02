@@ -1,4 +1,4 @@
-package com.example.androidteamproject
+package com.example.dostudy
 
 import android.app.ActivityManager
 import android.app.usage.UsageEvents
@@ -12,10 +12,9 @@ import androidx.annotation.RequiresApi
 import androidx.collection.LongSparseArray
 
 
-class CheckRunningActivity(context: Context, blockList: MutableSet<String>?) : Thread() {
+class AModeCheckRunningActivity(context: Context, val blockList: MutableSet<String>?) : Thread() {
     var am: ActivityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     var context: Context = context
-    val blockList = blockList
 
     companion object {
         var condition: Boolean = true
@@ -30,9 +29,8 @@ class CheckRunningActivity(context: Context, blockList: MutableSet<String>?) : T
         val intent = Intent(context, OverlayService::class.java)
         while (condition) {
             val packageName = getPackageName(context)
-            //if (packageName != "com.android.chrome") Log.d("ChkRunningActivity", packageName)
+            if (packageName != "com.android.chrome") Log.d("ChkRunningActivity", packageName)
             if (blockList!!.contains(packageName)) {
-                Log.d("ChkRunningActivity", "chrome launched")
                 if (!OverlayService.isRunning) {
                     context.startForegroundService(intent)
                     OverlayService.isRunning = true

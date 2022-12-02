@@ -1,4 +1,4 @@
-package com.example.androidteamproject
+package com.example.dostudy
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -10,14 +10,22 @@ import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
 import android.view.*
+import android.widget.ImageView
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import kotlin.random.Random
 
 
 class OverlayService : Service() {
 
     companion object {
         var isRunning = false
+
+        // 이미지 리스트 생성
+        val imageIdList = arrayOf(R.drawable.overlay1, R.drawable.overlay2, R.drawable.overlay3,
+            R.drawable.overlay4, R.drawable.overlay5, R.drawable.overlay6, R.drawable.overlay7,
+            R.drawable.overlay8, R.drawable.overlay9, R.drawable.overlay10, R.drawable.overlay11,
+            R.drawable.overlay12, R.drawable.overlay13, R.drawable.overlay14)
     }
 
     lateinit var wm: WindowManager
@@ -55,8 +63,16 @@ class OverlayService : Service() {
             PixelFormat.TRANSLUCENT
         )
 
-        params.gravity = Gravity.LEFT or Gravity.TOP
+        params.gravity = Gravity.START
         mView = inflate.inflate(R.layout.view_in_service, null)
+
+        // 랜덤 코드 작성
+
+
+        // 이미지 설정
+        var imageView: ImageView = (mView as View).findViewById<ImageView>(R.id.imageView)
+        imageView.setImageResource(imageIdList[Random.nextInt(0, imageIdList.size)])
+
         wm.addView(mView, params)
         isRunning = true
     }
