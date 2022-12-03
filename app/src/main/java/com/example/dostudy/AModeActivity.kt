@@ -44,7 +44,7 @@ class AModeActivity : AppCompatActivity() {
         numPickerHour.maxValue = 23
         numPickerMinute.minValue = 0
         numPickerMinute.maxValue = 59
-        numPickerSecond.minValue = 0
+        numPickerSecond.minValue = 1
         numPickerSecond.maxValue = 59
 
         var result = "공부타임"

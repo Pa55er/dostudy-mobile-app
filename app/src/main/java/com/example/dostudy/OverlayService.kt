@@ -70,7 +70,7 @@ class OverlayService : Service() {
 
 
         // 이미지 설정
-        var imageView: ImageView = (mView as View).findViewById<ImageView>(R.id.imageView)
+        val imageView: ImageView = mView!!.findViewById<ImageView>(R.id.imageView)
         imageView.setImageResource(imageIdList[Random.nextInt(0, imageIdList.size)])
 
         wm.addView(mView, params)
