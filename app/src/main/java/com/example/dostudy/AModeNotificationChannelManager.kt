@@ -17,6 +17,10 @@ object AModeNotificationChannelManager : android.app.Application() {
 
         @RequiresApi(Build.VERSION_CODES.O)
         val notificationChannel = NotificationChannel(uniqueId, channelName, importance)
+
+        init {
+            notificationChannel.setSound(null, null)
+        }
     }
 
     // 더 추가할 채널이 있으면 이 밑에 추가

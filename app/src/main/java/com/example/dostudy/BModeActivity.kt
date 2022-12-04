@@ -137,7 +137,7 @@ class BModeActivity : AppCompatActivity() {
 
             npSs[i] = NumberPicker(this)
             npSs[i]!!.maxValue = 59
-            npSs[i]!!.minValue = 1
+            npSs[i]!!.minValue = 0
             npSs[i]!!.value = pkgList[i].limitTimeSecond
             npSs[i]!!.id = View.generateViewId()
 
