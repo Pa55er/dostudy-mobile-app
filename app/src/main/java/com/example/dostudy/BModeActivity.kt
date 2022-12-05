@@ -187,15 +187,19 @@ class BModeActivity : AppCompatActivity() {
         }
 
         btnBModeSave.setOnClickListener {
-            
+
+            // Update된 내용 적용
+            pkgList.withIndex().forEach {
+                it.value.limitTimeHour = npHs[it.index]!!.value
+                it.value.limitTimeMinute = npMs[it.index]!!.value
+                it.value.limitTimeSecond = npSs[it.index]!!.value
+            }
+
             // DB에 Update 내용 저장
             runBlocking {
                 withContext(CoroutineScope(Dispatchers.Default).coroutineContext) {
-                    pkgList.withIndex().forEach {
-                        it.value.limitTimeHour = npHs[it.index]!!.value
-                        it.value.limitTimeMinute = npMs[it.index]!!.value
-                        it.value.limitTimeSecond = npSs[it.index]!!.value
-                        bModeDB.bModePackageDataDao().update(it.value)
+                    pkgList.forEach {
+                        bModeDB.bModePackageDataDao().update(it)
                     }
                 }
             }
@@ -209,71 +213,83 @@ class BModeActivity : AppCompatActivity() {
                                 it.limitTimeMinute * 60 + it.limitTimeSecond
                     }.toMutableMap()
 
+            // 체크된 앱이 적어도 1개 이상 있는 경우
+            if (blockAppList.isNotEmpty()) {
 
-            if(btnBModeSave.isClickable) {
-                btnBModeSave.isClickable = false
+                if (btnBModeSave.isClickable) {
+                    btnBModeSave.isClickable = false
 
-                // B모드 활성화된 동안 A모드 비활성화
-                val btnAMode = mainActivity!!.findViewById<Button>(R.id.btnAMode)
-                btnAMode.isClickable = false
+                    // B모드 활성화된 동안 A모드 비활성화
+                    val btnAMode = mainActivity!!.findViewById<Button>(R.id.btnAMode)
+                    btnAMode.isClickable = false
 
-                val builder = NotificationCompat.Builder(this,
-                    BModeNotificationChannelManager.StudyNotificationChannel.uniqueId).apply {
-                    setSmallIcon(R.drawable.ic_launcher_background)
-                    setContentTitle("공부")
-                    priority = NotificationCompat.PRIORITY_DEFAULT
-                }
-                val progressMax = blockAppList.map { it.value }.max()
-                var progressCur = progressMax
-                NotificationManagerCompat.from(this).apply {
-                    val timer = Timer()
-                    BModeCheckRunningActivity.condition = true
-                    BModeCheckRunningActivity(this@BModeActivity,
-                        blockAppList
-                    ).start()
+                    val builder = NotificationCompat.Builder(
+                        this,
+                        BModeNotificationChannelManager.StudyNotificationChannel.uniqueId
+                    ).apply {
+                        setSmallIcon(R.drawable.ic_launcher_background)
+                        setContentTitle("공부")
+                        priority = NotificationCompat.PRIORITY_DEFAULT
+                    }
+                    val progressMax = blockAppList.map { it.value }.max()
+                    var progressCur = progressMax
+                    NotificationManagerCompat.from(this).apply {
+                        val timer = Timer()
+                        BModeCheckRunningActivity.condition = true
+                        BModeCheckRunningActivity(
+                            this@BModeActivity,
+                            blockAppList
+                        ).start()
 
-                    timer.schedule(object : TimerTask() {
-                        override fun run() {
-                            --progressCur
+                        timer.schedule(object : TimerTask() {
+                            override fun run() {
+                                --progressCur
 
-                            // 1초마다 각 앱의 차단 시간 1초씩 줄이기
-                            // 시간이 다 되었으면 차단 목록에서 제거
-                            val blockAppListIter = blockAppList.iterator()
-                            while (blockAppListIter.hasNext()) {
-                                val next = blockAppListIter.next()
-                                if (next.value - 1 <= 0) {
-                                    blockAppListIter.remove()
+                                // 1초마다 각 앱의 차단 시간 1초씩 줄이기
+                                // 시간이 다 되었으면 차단 목록에서 제거
+                                val blockAppListIter = blockAppList.iterator()
+                                while (blockAppListIter.hasNext()) {
+                                    val next = blockAppListIter.next()
+                                    if (next.value - 1 <= 0) {
+                                        blockAppListIter.remove()
 
-                                    // 차단 목록에서 제거된 앱 이름 Toast로 출력
-                                    val handler = Handler(Looper.getMainLooper())
-                                    handler.postDelayed({
-                                        Toast.makeText(applicationContext,
-                                            "${pkgList.find { it.packageName == next.key }!!.appName }앱이 차단 해제 되었습니다.",
-                                            Toast.LENGTH_SHORT).show()
-                                    }, 0)
+                                        // 차단 목록에서 제거된 앱 이름 Toast로 출력
+                                        val handler = Handler(Looper.getMainLooper())
+                                        handler.postDelayed({
+                                            Toast.makeText(
+                                                applicationContext,
+                                                "${pkgList.find { it.packageName == next.key }!!.appName}앱이 차단 해제 되었습니다.",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }, 0)
 
+                                    } else next.setValue(next.value - 1)
                                 }
-                                else next.setValue(next.value - 1)
-                            }
 
-                            Log.d("block2", blockAppList.keys.toList().toString())
+                                Log.d("block2", blockAppList.keys.toList().toString())
 
-                            if (progressCur == -1) {
-                                builder.setContentText("종료")
-                                    .setProgress(0, 0, false)
+                                if (progressCur == -1) {
+                                    builder.setContentText("종료")
+                                        .setProgress(0, 0, false)
+                                    notify(66, builder.build())
+                                    timer.cancel()
+                                    btnBModeSave.isClickable = true
+                                    // B모드 종료시 A모드 다시 활성화
+                                    btnAMode.isClickable = true
+                                    BModeCheckRunningActivity.condition = false
+                                }
+                                builder.setProgress(progressMax, progressCur, false)
                                 notify(66, builder.build())
-                                timer.cancel()
-                                btnBModeSave.isClickable = true
-                                // B모드 종료시 A모드 다시 활성화
-                                btnAMode.isClickable = true
-                                BModeCheckRunningActivity.condition = false
+                                builder.setContentText(progressCur.toString() + "초 남음")
                             }
-                            builder.setProgress(progressMax, progressCur, false)
-                            notify(66, builder.build())
-                            builder.setContentText(progressCur.toString() + "초 남음")
-                        }
-                    }, 0, 1000)
+                        }, 0, 1000)
+                    }
                 }
+            }
+            // 체크한 앱이 하나도 없을 경우
+            else {
+                Toast.makeText(applicationContext, "최소 1개 이상의 앱을 체크해 주세요",
+                    Toast.LENGTH_SHORT).show()
             }
         }
     }
