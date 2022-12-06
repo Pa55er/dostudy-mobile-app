@@ -66,15 +66,12 @@ class BModeActivity : AppCompatActivity() {
 
             chkboxApps[i] = CheckBox(this)
             chkboxApps[i]!!.isChecked = pkgList[i].isChecked
-            chkboxApps[i]!!.id = View.generateViewId()
             chkboxApps[i]!!.width = 100
 
             tvAppNames[i] = TextView(this)
-            tvAppNames[i]!!.id = View.generateViewId()
             tvAppNames[i]!!.text = pkgList[i].appName
 
             btnTimeSettings[i] = Button(this)
-            btnTimeSettings[i]!!.id = View.generateViewId()
             btnTimeSettings[i]!!.text = "시간 세부 설정"
 
 
@@ -84,7 +81,6 @@ class BModeActivity : AppCompatActivity() {
             llSettingNPs[i]!!.layoutParams = llNP
             llSettingNPs[i]!!.orientation = LinearLayout.HORIZONTAL
             llSettingNPs[i]!!.gravity = Gravity.CENTER_HORIZONTAL
-            llSettingNPs[i]!!.id = View.generateViewId()
             llSettingNPs[i]!!.visibility = View.GONE
 
 
@@ -103,7 +99,6 @@ class BModeActivity : AppCompatActivity() {
             npHs[i]!!.maxValue = 23
             npHs[i]!!.minValue = 0
             npHs[i]!!.value = pkgList[i].limitTimeHour
-            npHs[i]!!.id = View.generateViewId()
 
 
             llSettingNPMs[i] = LinearLayout(this)
@@ -121,7 +116,6 @@ class BModeActivity : AppCompatActivity() {
             npMs[i]!!.maxValue = 59
             npMs[i]!!.minValue = 0
             npMs[i]!!.value = pkgList[i].limitTimeMinute
-            npMs[i]!!.id = View.generateViewId()
 
 
             llSettingNPSs[i] = LinearLayout(this)
@@ -139,7 +133,6 @@ class BModeActivity : AppCompatActivity() {
             npSs[i]!!.maxValue = 59
             npSs[i]!!.minValue = 0
             npSs[i]!!.value = pkgList[i].limitTimeSecond
-            npSs[i]!!.id = View.generateViewId()
 
 
             //앱 이름과 체크박스 추가
@@ -164,6 +157,7 @@ class BModeActivity : AppCompatActivity() {
             llSettingNPs[i]!!.addView(llSettingNPHs[i])
             llSettingNPs[i]!!.addView(llSettingNPMs[i])
             llSettingNPs[i]!!.addView(llSettingNPSs[i])
+
             // 리스트 뷰에 전부 추가
             LLBModeAppList.addView(LOAppName)
             LLBModeAppList.addView(btnTimeSettings[i])
