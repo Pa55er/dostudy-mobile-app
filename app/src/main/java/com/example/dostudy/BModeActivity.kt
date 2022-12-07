@@ -272,9 +272,18 @@ class BModeActivity : AppCompatActivity() {
                                     btnAMode.isClickable = true
                                     BModeCheckRunningActivity.condition = false
                                 }
+
+                                val hour = progressCur / 3600
+                                val minute = (progressCur % 3600) / 60
+
+                                val hourText = if (hour != 0) "${hour}시간" else ""
+                                val minuteText = if (minute != 0) "${minute}분" else ""
+                                val secondText = "${progressCur % 60}초"
+
                                 builder.setProgress(progressMax, progressCur, false)
                                 notify(66, builder.build())
-                                builder.setContentText(progressCur.toString() + "초 남음")
+                                builder.setContentText(hourText + " " + minuteText + " " +
+                                        secondText + " 남음")
                             }
                         }, 0, 1000)
                     }
