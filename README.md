@@ -1,4 +1,4 @@
-<h1>AndroidTeamProject</h1>동아대학교 소프트웨어실습및설계2
+<h1>AndroidTeamProject</h1>
 <h2>Members</h2>
 김종훈 - Backend<br>
 윤석준 - Backend<br>
